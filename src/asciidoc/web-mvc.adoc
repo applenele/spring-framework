@@ -313,13 +313,13 @@ Note that we can achieve the same with java-based configurations:
 		@Override
 		protected Class<?>[] getRootConfigClasses() {
 			// GolfingAppConfig defines beans that would be in root-context.xml
-			return new Class[] { GolfingAppConfig.class };
+			return new Class<?>[] { GolfingAppConfig.class };
 		}
 
 		@Override
 		protected Class<?>[] getServletConfigClasses() {
 			// GolfingWebConfig defines beans that would be in golfing-servlet.xml
-			return new Class[] { GolfingWebConfig.class };
+			return new Class<?>[] { GolfingWebConfig.class };
 		}
 
 		@Override
@@ -2291,6 +2291,12 @@ For controllers relying on view resolution, JSONP is automatically enabled when 
 request has a query parameter named `jsonp` or `callback`. Those names can be
 customized through `jsonpParameterNames` property.
 
+[NOTE]
+====
+As of Spring Framework 4.3.18, JSONP support is deprecated and will be removed as of
+Spring Framework 5.1, <<cors,CORS>> should be used instead.
+====
+
 
 [[mvc-ann-async]]
 === Asynchronous Request Processing
@@ -3314,7 +3320,8 @@ also have the literal part of the servlet mapping included:
 [[mvc-links-to-controllers]]
 === Building URIs to Controllers and methods
 
-Spring MVC also provides a mechanism for building links to controller methods. For example, given:
+Spring MVC provides a mechanism to prepare links to controller methods. For example,
+the following MVC controller easily allows for link creation:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3324,7 +3331,7 @@ Spring MVC also provides a mechanism for building links to controller methods. F
 	public class BookingController {
 
 		@GetMapping("/bookings/{booking}")
-		public String getBooking(@PathVariable Long booking) {
+		public ModelAndView getBooking(@PathVariable Long booking) {
 			// ...
 		}
 	}
@@ -3360,6 +3367,16 @@ akin to mock testing through proxies to avoid referring to the controller method
 
 	URI uri = uriComponents.encode().toUri();
 ----
+
+[NOTE]
+====
+Controller method signatures are limited in their design when supposed to be usable for
+link creation with `fromMethodCall`. Aside from needing a proper parameter signature,
+there is a technical limitation on the return type: namely generating a runtime proxy
+for link builder invocations, so the return type must not be `final`. In particular,
+the common `String` return type for view names does not work here; use `ModelAndView`
+or even plain `Object` (with a `String` return value) instead.
+====
 
 The above examples use static methods in `MvcUriComponentsBuilder`. Internally they rely
 on `ServletUriComponentsBuilder` to prepare a base URL from the scheme, host, port,
@@ -3964,11 +3981,11 @@ especially when relying on `@ResponseBody` methods rather than on view resolutio
 may be more convenient to directly set the status of the response and optionally write
 error content to the body of the response.
 
-You can do that with `@ExceptionHandler` methods. When declared within a controller such
-methods apply to exceptions raised by `@RequestMapping` methods of that controller (or
-any of its subclasses). You can also declare an `@ExceptionHandler` method within an
-`@ControllerAdvice` class in which case it handles exceptions from `@RequestMapping`
-methods from many controllers. Below is an example of a controller-local
+You can do that with `@ExceptionHandler` methods. When declared within a controller,
+such methods apply to exceptions raised by `@RequestMapping` methods of that controller
+(or any of its subclasses). You can also declare an `@ExceptionHandler` method within
+an `@ControllerAdvice` class in which case it handles exceptions from `@RequestMapping`
+methods from many controllers. Below is an example for a controller-local
 `@ExceptionHandler` method:
 
 [source,java,indent=0]
@@ -3977,21 +3994,28 @@ methods from many controllers. Below is an example of a controller-local
 	@Controller
 	public class SimpleController {
 
-		// @RequestMapping methods omitted ...
+		// ...
 
-		@ExceptionHandler(IOException.class)
-		public ResponseEntity<String> handleIOException(IOException ex) {
-			// prepare responseEntity
-			return responseEntity;
+		@ExceptionHandler
+		public ResponseEntity<String> handle(IOException ex) {
+			// ...
 		}
-
 	}
 ----
 
-The `@ExceptionHandler` value can be set to an array of Exception types. If an exception
-is thrown that matches one of the types in the list, then the method annotated with the
-matching `@ExceptionHandler` will be invoked. If the annotation value is not set then
-the exception types listed as method arguments are used.
+The exception may match against a top-level exception being propagated (i.e. a direct
+`IOException` thrown), or against the immediate cause within a top-level wrapper exception
+(e.g. an `IOException` wrapped inside an `IllegalStateException`).
+
+For matching exception types, preferably declare the target exception as a method argument
+as shown above. When multiple exception methods match, a root exception match is generally
+preferred to a cause exception match. More specifically, the `ExceptionDepthComparator` is
+used to sort exceptions based on their depth from the thrown exception type.
+
+Alternatively, the `@ExceptionHandler` value can be set to an array of exception types.
+If an exception is thrown that matches one of the types in the list, then the method
+annotated with the matching `@ExceptionHandler` will be invoked. If the annotation value
+is not set, then the declared method parameter type will be used for matching.
 
 [TIP]
 ====
@@ -4003,18 +4027,26 @@ advice bean. As a consequence, when using a multi-advice arrangement, please dec
 primary root exception mappings on a prioritized advice bean with a corresponding order!
 ====
 
-Much like standard controller methods annotated with a `@RequestMapping` annotation, the
-method arguments and return values of `@ExceptionHandler` methods can be flexible. For
-example, the `HttpServletRequest` can be accessed in Servlet environments and the
+Much like standard controller methods annotated with a `@RequestMapping` annotation,
+the method arguments and return values of `@ExceptionHandler` methods can be flexible.
+For example, the `HttpServletRequest` can be accessed in Servlet environments and the
 `PortletRequest` in Portlet environments. The return type can be a `String`, which is
 interpreted as a view name, a `ModelAndView` object, a `ResponseEntity`, or you can also
 add the `@ResponseBody` to have the method return value converted with message
 converters and written to the response stream.
 
+Last but not least, an `@ExceptionHandler` method implementation may choose to back
+out of dealing with a given exception instance by rethrowing it in its original form.
+This is useful in scenarios where you are only interested in root-level matches or in
+matches within a specific context that cannot be statically determined. A rethrown
+exception will be propagated through the remaining resolution chain, just like if
+the given `@ExceptionHandler` method would not have matched in the first place.
+
 
 
 [[mvc-ann-rest-spring-mvc-exceptions]]
 === Handling Standard Spring MVC Exceptions
+
 Spring MVC may raise a number of exceptions while processing a request. The
 `SimpleMappingExceptionResolver` can easily map any exception to a default error view as
 needed. However, when working with clients that interpret responses in an automated way
@@ -4702,7 +4734,7 @@ This is recommended for applications that use Java-based Spring configuration:
 
 		@Override
 		protected Class<?>[] getServletConfigClasses() {
-			return new Class[] { MyWebConfig.class };
+			return new Class<?>[] { MyWebConfig.class };
 		}
 
 		@Override
@@ -4841,7 +4873,7 @@ It also enables the following:
 in addition to the JavaBeans PropertyEditors used for Data Binding.
 . Support for <<format,formatting>> Number fields using the `@NumberFormat` annotation
 through the `ConversionService`.
-. Support for <<format,formatting>> `Date`, `Calendar`, `Long`, and Joda Time fields using the
+. Support for <<format,formatting>> `Date`, `Calendar`, `Long`, and Joda-Time fields using the
 `@DateTimeFormat` annotation.
 . Support for <<mvc-config-validation,validating>> `@Controller` inputs with `@Valid`, if
 a JSR-303 Provider is present on the classpath.
@@ -4925,8 +4957,8 @@ available.
 === Conversion and Formatting
 
 By default formatters for `Number` and `Date` types are installed, including support for
-the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda Time
-formatting library is also installed if Joda Time is present on the classpath. To
+the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda-Time
+formatting library is also installed if Joda-Time is present on the classpath. To
 register custom formatters and converters, override the `addFormatters` method:
 
 [source,java,indent=0]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.framework.AopInfrastructureBean;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -95,9 +97,9 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private JmsListenerEndpointRegistry endpointRegistry;
-
 	private String containerFactoryBeanName = DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME;
+
+	private JmsListenerEndpointRegistry endpointRegistry;
 
 	private final MessageHandlerMethodFactoryAdapter messageHandlerMethodFactory =
 			new MessageHandlerMethodFactoryAdapter();
@@ -120,19 +122,19 @@ public class JmsListenerAnnotationBeanPostProcessor
 	}
 
 	/**
-	 * Set the {@link JmsListenerEndpointRegistry} that will hold the created
-	 * endpoint and manage the lifecycle of the related listener container.
-	 */
-	public void setEndpointRegistry(JmsListenerEndpointRegistry endpointRegistry) {
-		this.endpointRegistry = endpointRegistry;
-	}
-
-	/**
 	 * Set the name of the {@link JmsListenerContainerFactory} to use by default.
 	 * <p>If none is specified, "jmsListenerContainerFactory" is assumed to be defined.
 	 */
 	public void setContainerFactoryBeanName(String containerFactoryBeanName) {
 		this.containerFactoryBeanName = containerFactoryBeanName;
+	}
+
+	/**
+	 * Set the {@link JmsListenerEndpointRegistry} that will hold the created
+	 * endpoint and manage the lifecycle of the related listener container.
+	 */
+	public void setEndpointRegistry(JmsListenerEndpointRegistry endpointRegistry) {
+		this.endpointRegistry = endpointRegistry;
 	}
 
 	/**
@@ -178,6 +180,10 @@ public class JmsListenerAnnotationBeanPostProcessor
 			}
 		}
 
+		if (this.containerFactoryBeanName != null) {
+			this.registrar.setContainerFactoryBeanName(this.containerFactoryBeanName);
+		}
+
 		if (this.registrar.getEndpointRegistry() == null) {
 			// Determine JmsListenerEndpointRegistry bean from the BeanFactory
 			if (this.endpointRegistry == null) {
@@ -188,9 +194,6 @@ public class JmsListenerAnnotationBeanPostProcessor
 			this.registrar.setEndpointRegistry(this.endpointRegistry);
 		}
 
-		if (this.containerFactoryBeanName != null) {
-			this.registrar.setContainerFactoryBeanName(this.containerFactoryBeanName);
-		}
 
 		// Set the custom handler method factory once resolved by the configurer
 		MessageHandlerMethodFactory handlerMethodFactory = this.registrar.getMessageHandlerMethodFactory();
@@ -214,8 +217,13 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 	@Override
 	public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
-		if (!this.nonAnnotatedClasses.contains(bean.getClass())) {
-			Class<?> targetClass = AopUtils.getTargetClass(bean);
+		if (bean instanceof AopInfrastructureBean) {
+			// Ignore AOP infrastructure such as scoped proxies.
+			return bean;
+		}
+
+		Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
+		if (!this.nonAnnotatedClasses.contains(targetClass)) {
 			Map<Method, Set<JmsListener>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
 					new MethodIntrospector.MetadataLookup<Set<JmsListener>>() {
 						@Override
@@ -226,9 +234,9 @@ public class JmsListenerAnnotationBeanPostProcessor
 						}
 					});
 			if (annotatedMethods.isEmpty()) {
-				this.nonAnnotatedClasses.add(bean.getClass());
+				this.nonAnnotatedClasses.add(targetClass);
 				if (logger.isTraceEnabled()) {
-					logger.trace("No @JmsListener annotations found on bean type: " + bean.getClass());
+					logger.trace("No @JmsListener annotations found on bean type: " + targetClass);
 				}
 			}
 			else {

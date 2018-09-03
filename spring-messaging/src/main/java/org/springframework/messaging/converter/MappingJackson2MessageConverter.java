@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,8 +180,9 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			return;
 		}
 
+		// Do not log warning for serializer not found (note: different message wording on Jackson 2.9)
 		boolean debugLevel = (cause instanceof JsonMappingException &&
-				cause.getMessage().startsWith("Can not find"));
+				(cause.getMessage().startsWith("Can not find") || cause.getMessage().startsWith("Cannot find")));
 
 		if (debugLevel ? logger.isDebugEnabled() : logger.isWarnEnabled()) {
 			String msg = "Failed to evaluate Jackson " + (type instanceof JavaType ? "de" : "") +
@@ -237,6 +238,9 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		if (conversionHint instanceof MethodParameter) {
 			MethodParameter param = (MethodParameter) conversionHint;
 			param = param.nestedIfOptional();
+			if (Message.class.isAssignableFrom(param.getParameterType())) {
+				param = param.nested();
+			}
 			Type genericParameterType = param.getNestedGenericParameterType();
 			Class<?> contextClass = param.getContainingClass();
 			Type type = getJavaType(genericParameterType, contextClass);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,7 +199,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	private CacheControl parseCacheControl(Element element) {
-		CacheControl cacheControl = CacheControl.empty();
+		CacheControl cacheControl;
 		if ("true".equals(element.getAttribute("no-cache"))) {
 			cacheControl = CacheControl.noCache();
 		}
@@ -209,6 +209,10 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		else if (element.hasAttribute("max-age")) {
 			cacheControl = CacheControl.maxAge(Long.parseLong(element.getAttribute("max-age")), TimeUnit.SECONDS);
 		}
+		else {
+			cacheControl = CacheControl.empty();
+		}
+
 		if ("true".equals(element.getAttribute("must-revalidate"))) {
 			cacheControl = cacheControl.mustRevalidate();
 		}
@@ -244,9 +248,9 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		String autoRegistration = element.getAttribute("auto-registration");
 		boolean isAutoRegistration = !(StringUtils.hasText(autoRegistration) && "false".equals(autoRegistration));
 
-		ManagedList<? super Object> resourceResolvers = new ManagedList<Object>();
+		ManagedList<Object> resourceResolvers = new ManagedList<Object>();
 		resourceResolvers.setSource(source);
-		ManagedList<? super Object> resourceTransformers = new ManagedList<Object>();
+		ManagedList<Object> resourceTransformers = new ManagedList<Object>();
 		resourceTransformers.setSource(source);
 
 		parseResourceCache(resourceResolvers, resourceTransformers, element, source);
@@ -261,8 +265,8 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private void parseResourceCache(ManagedList<? super Object> resourceResolvers,
-			ManagedList<? super Object> resourceTransformers, Element element, Object source) {
+	private void parseResourceCache(ManagedList<Object> resourceResolvers,
+			ManagedList<Object> resourceTransformers, Element element, Object source) {
 
 		String resourceCache = element.getAttribute("resource-cache");
 		if ("true".equals(resourceCache)) {
@@ -300,7 +304,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private void parseResourceResolversTransformers(boolean isAutoRegistration,
-			ManagedList<? super Object> resourceResolvers, ManagedList<? super Object> resourceTransformers,
+			ManagedList<Object> resourceResolvers, ManagedList<Object> resourceTransformers,
 			ParserContext context, Element element, Object source) {
 
 		Element resolversElement = DomUtils.getChildElementByTagName(element, "resolvers");
@@ -347,7 +351,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private RootBeanDefinition parseVersionResolver(ParserContext context, Element element, Object source) {
-		ManagedMap<String, ? super Object> strategyMap = new ManagedMap<String, Object>();
+		ManagedMap<String, Object> strategyMap = new ManagedMap<String, Object>();
 		strategyMap.setSource(source);
 		RootBeanDefinition versionResolverDef = new RootBeanDefinition(VersionResourceResolver.class);
 		versionResolverDef.setSource(source);
