@@ -91,7 +91,7 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 	 * Remove the given AdvisedSupportListener from this proxy configuration.
 	 * @param listener the listener to deregister
 	 */
-	public void removeListener(AdvisedSupportListener listeneReflectionUtilsr) {
+	public void removeListener(AdvisedSupportListener listener) {
 		Assert.notNull(listener, "AdvisedSupportListener must not be null");
 		this.listeners.remove(listener);
 	}
