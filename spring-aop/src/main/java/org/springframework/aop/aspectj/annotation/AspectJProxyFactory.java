@@ -35,7 +35,7 @@ import org.springframework.util.ClassUtils;
  * AspectJ-based proxy factory, allowing for programmatic building
  * of proxies which include AspectJ aspects (code style as well
  * Java 5 annotation style).
- *
+ *  将注解Aspect 转成 Advisors，其他的跟ProxyFactory差不多
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Ramnivas Laddad
@@ -115,6 +115,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	/**
 	 * Add all {@link Advisor Advisors} from the supplied {@link MetadataAwareAspectInstanceFactory}
 	 * to the current chain. Exposes any special purpose {@link Advisor Advisors} if needed.
+	 * 将Aspect转换成Advisors
 	 * @see AspectJProxyUtils#makeAdvisorChainAspectJCapableIfNecessary(List)
 	 */
 	private void addAdvisorsFromAspectInstanceFactory(MetadataAwareAspectInstanceFactory instanceFactory) {

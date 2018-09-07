@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
 /**
  * Convenience superclass for configuration used in creating proxies,
  * to ensure that all proxy creators have consistent properties.
- *
+ * proxy控制
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see AdvisedSupport
@@ -33,6 +33,13 @@ public class ProxyConfig implements Serializable {
 	/** use serialVersionUID from Spring 1.2 for interoperability */
 	private static final long serialVersionUID = -8409359707199703185L;
 
+	/**
+	 * proxyTargetClass，true代表直接代理类，false代表代理接口。默认为false
+	 * optimize，true时采用Cglib动态代理
+	 * opaque，代表子类是否能被转换为Advised接口，默认为false，表示可以
+	 * exposeProxy，是否暴露代理，也就是是否把当前代理对象绑定到AopContext的ThreadLocal属性currentProxy上去，常用于代理类里面的代理方法需要调用同类里面另外一个代理方法的场景。
+	 * frozen，当前代理配置是否被冻结
+	 */
 
 	private boolean proxyTargetClass = false;
 

@@ -52,6 +52,7 @@ import org.springframework.util.ClassUtils;
  * <p>Proxies are serializable so long as all Advisors (including Advices
  * and Pointcuts) and the TargetSource are serializable.
  *
+ *  基于JdkDynamic的动态代理，实现了InvocationHandler
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop

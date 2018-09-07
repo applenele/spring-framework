@@ -25,6 +25,8 @@ import org.springframework.util.Assert;
  * Base class for proxy factories.
  * Provides convenient access to a configurable AopProxyFactory.
  *
+ * 代理生成支持。持有aopProxyFactory 可用于生成AopProxy,借助AopProxy生成代理对象
+ *
  * @author Juergen Hoeller
  * @since 2.0.3
  * @see #createAopProxy()
@@ -44,6 +46,7 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 	 * Create a new ProxyCreatorSupport instance.
 	 */
 	public ProxyCreatorSupport() {
+		// 默认采用DefaultAopProxyFactory
 		this.aopProxyFactory = new DefaultAopProxyFactory();
 	}
 
@@ -88,7 +91,7 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 	 * Remove the given AdvisedSupportListener from this proxy configuration.
 	 * @param listener the listener to deregister
 	 */
-	public void removeListener(AdvisedSupportListener listener) {
+	public void removeListener(AdvisedSupportListener listeneReflectionUtilsr) {
 		Assert.notNull(listener, "AdvisedSupportListener must not be null");
 		this.listeners.remove(listener);
 	}
