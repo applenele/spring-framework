@@ -512,10 +512,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 			throws BeansException {
 
+		// 从Registry中 beanDefinitions 获取beanDefinitionNames
 		String[] beanNames = getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		Map<String, T> result = new LinkedHashMap<String, T>(beanNames.length);
 		for (String beanName : beanNames) {
 			try {
+				// 根据beanName去创建bean,放到map中
 				result.put(beanName, getBean(beanName, type));
 			}
 			catch (BeanCreationException ex) {

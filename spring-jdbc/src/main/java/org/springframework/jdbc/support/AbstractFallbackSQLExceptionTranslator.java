@@ -70,13 +70,14 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 			sql = "";
 		}
 
+		// 调用一级转换器
 		DataAccessException dae = doTranslate(task, sql, ex);
 		if (dae != null) {
 			// Specific exception match found.
 			return dae;
 		}
 
-		// Looking for a fallback...
+		// Looking for a fallback... 调用二级异常转换器
 		SQLExceptionTranslator fallback = getFallbackTranslator();
 		if (fallback != null) {
 			dae = fallback.translate(task, sql, ex);

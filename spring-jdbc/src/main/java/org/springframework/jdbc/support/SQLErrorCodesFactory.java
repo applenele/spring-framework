@@ -101,6 +101,7 @@ public class SQLErrorCodesFactory {
 		Map<String, SQLErrorCodes> errorCodes;
 
 		try {
+			// 用DefaultListableBeanFactory 加载sql-error-codes.xml
 			DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 			lbf.setBeanClassLoader(getClass().getClassLoader());
 			XmlBeanDefinitionReader bdr = new XmlBeanDefinitionReader(lbf);
@@ -114,7 +115,7 @@ public class SQLErrorCodesFactory {
 				logger.warn("Default sql-error-codes.xml not found (should be included in spring.jar)");
 			}
 
-			// Load custom SQL error codes, overriding defaults.
+			// Load custom SQL error codes, overriding defaults. 加载自定义的sqlerrorcode，覆盖默认
 			resource = loadResource(SQL_ERROR_CODE_OVERRIDE_PATH);
 			if (resource != null && resource.exists()) {
 				bdr.loadBeanDefinitions(resource);
@@ -122,6 +123,7 @@ public class SQLErrorCodesFactory {
 			}
 
 			// Check all beans of type SQLErrorCodes.
+			// 从Registry 的beanDefinitionNames中获取 beanNames，在根据beanNames去创建bean
 			errorCodes = lbf.getBeansOfType(SQLErrorCodes.class, true, false);
 			if (logger.isDebugEnabled()) {
 				logger.debug("SQLErrorCodes loaded: " + errorCodes.keySet());
