@@ -34,7 +34,7 @@ import java.util.ListIterator;
  * use the {@link java.util.Collections#synchronizedList} utility methods.
  *
  * <p>Inspired by {@code LazyList} from Commons Collections.
- *
+ * 获取的值为空，自动填充
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
@@ -138,6 +138,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 		if (index < backingListSize) {
 			element = this.backingList.get(index);
 			if (element == null) {
+				// 如果根据下标获取的值为空，创建一个设置当前位置
 				element = this.elementFactory.createElement(index);
 				this.backingList.set(index, element);
 			}

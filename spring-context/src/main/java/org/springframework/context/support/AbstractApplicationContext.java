@@ -556,16 +556,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
     public void refresh() throws BeansException, IllegalStateException {
         synchronized (this.startupShutdownMonitor) {
             // Prepare this context for refreshing.
+            // 准备工作
             prepareRefresh();
 
             // Tell the subclass to refresh the internal bean factory.
+            // 获取beanFactory
             ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
             // Prepare the bean factory for use in this context.
+            // beanFactory 准备工作
             prepareBeanFactory(beanFactory);
 
             try {
                 // Allows post-processing of the bean factory in context subclasses.
+                // beanFactory准备工作完成之后执行一些处理工作
                 postProcessBeanFactory(beanFactory);
 
                 // Invoke factory processors registered as beans in the context.
@@ -573,6 +577,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
                 invokeBeanFactoryPostProcessors(beanFactory);
 
                 // Register bean processors that intercept bean creation.
+                // 注册BeanPostProcessor
                 registerBeanPostProcessors(beanFactory);
 
                 // Initialize message source for this context.
@@ -587,10 +592,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
                 onRefresh();
 
                 // Check for listener beans and register them.
-                // 注册监听器
+                // 注册监听器到上面的初始化的广播器里面
                 registerListeners();
 
                 // Instantiate all remaining (non-lazy-init) singletons.
+                // 初始化全部的单实例
                 finishBeanFactoryInitialization(beanFactory);
 
                 // Last step: publish corresponding event.
@@ -805,6 +811,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
                 logger.debug("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
             }
         } else {
+            // 创建的默认的SimpleApplicationEventMulticaster
             this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
             beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
             if (logger.isDebugEnabled()) {
@@ -872,6 +879,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
         }
 
         // Publish early application events now that we finally have a multicaster...
+        // 发布已经存在的事件
         Set<ApplicationEvent> earlyEventsToProcess = this.earlyApplicationEvents;
         this.earlyApplicationEvents = null;
         if (earlyEventsToProcess != null) {
@@ -918,6 +926,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
         beanFactory.freezeConfiguration();
 
         // Instantiate all remaining (non-lazy-init) singletons.
+        // 初始化单实例
         beanFactory.preInstantiateSingletons();
     }
 
@@ -928,6 +937,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
      */
     protected void finishRefresh() {
         // Initialize lifecycle processor for this context.
+        // 初始化生命周期processor
         initLifecycleProcessor();
 
         // Propagate refresh to lifecycle processor first.

@@ -79,6 +79,7 @@ class PostProcessorRegistrationDelegate {
             List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<BeanDefinitionRegistryPostProcessor>();
 
             // First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
+            // 首先，执行实现了PriorityOrdered 接口的BeanDefinitionRegistryPostProcessor
             String[] postProcessorNames =
                     beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
             for (String ppName : postProcessorNames) {
@@ -93,6 +94,7 @@ class PostProcessorRegistrationDelegate {
             currentRegistryProcessors.clear();
 
             // Next, invoke the BeanDefinitionRegistryPostProcessors that implement Ordered.
+            // 执行实现了Ordered的BeanFactoryPostProcessor
             postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
             for (String ppName : postProcessorNames) {
                 if (!processedBeans.contains(ppName) && beanFactory.isTypeMatch(ppName, Ordered.class)) {
@@ -133,6 +135,7 @@ class PostProcessorRegistrationDelegate {
 
         // Do not initialize FactoryBeans here: We need to leave all regular beans
         // uninitialized to let the bean factory post-processors apply to them!
+        // 执行BeanFactoryPostProcessor
         String[] postProcessorNames =
                 beanFactory.getBeanNamesForType(BeanFactoryPostProcessor.class, true, false);
 
@@ -177,9 +180,16 @@ class PostProcessorRegistrationDelegate {
         beanFactory.clearMetadataCache();
     }
 
+    /**
+     * 注册 BeanPostProcessor
+     * 按照优先级注册 priorityOrderedPostProcessors > orderedPostProcessors > nonOrderedPostProcessors > internalPostProcessors
+     * @param beanFactory
+     * @param applicationContext
+     */
     public static void registerBeanPostProcessors(
             ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
 
+        // 获取全部的BeanPostProcessor
         String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
         // Register BeanPostProcessorChecker that logs an info message when
