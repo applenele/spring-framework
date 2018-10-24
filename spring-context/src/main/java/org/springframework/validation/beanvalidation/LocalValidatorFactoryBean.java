@@ -307,6 +307,8 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		// Allow for custom post-processing before we actually build the ValidatorFactory.
 		postProcessConfiguration(configuration);
 
+		// 1. 生成 validatorFactory
+		// 2. 通过 validateFactory 生成 targetValidator（SpringValidatorAdapter）
 		this.validatorFactory = configuration.buildValidatorFactory();
 		setTargetValidator(this.validatorFactory.getValidator());
 	}

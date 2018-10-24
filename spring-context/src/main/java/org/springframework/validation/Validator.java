@@ -65,6 +65,7 @@ package org.springframework.validation;
 public interface Validator {
 
 	/**
+	 *  该验证器是否支持验证
 	 * Can this {@link Validator} {@link #validate(Object, Errors) validate}
 	 * instances of the supplied {@code clazz}?
 	 * <p>This method is <i>typically</i> implemented like so:
@@ -80,6 +81,7 @@ public interface Validator {
 	boolean supports(Class<?> clazz);
 
 	/**
+	 * 验证
 	 * Validate the supplied {@code target} object, which must be
 	 * of a {@link Class} for which the {@link #supports(Class)} method
 	 * typically has (or would) return {@code true}.

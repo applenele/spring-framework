@@ -27,6 +27,7 @@ package org.springframework.validation;
 public interface SmartValidator extends Validator {
 
 	/**
+	 * 这个接口在超接口的基础上又增加了一个方法，“执行验证时可传入分组”。这里的分组就是jsr303规范中定义的groups，它的作用是控制验证顺序或只对部分字段执行验证。
 	 * Validate the supplied {@code target} object, which must be of a type of {@link Class}
 	 * for which the {@link #supports(Class)} method typically returns {@code true}.
 	 * <p>The supplied {@link Errors errors} instance can be used to report any

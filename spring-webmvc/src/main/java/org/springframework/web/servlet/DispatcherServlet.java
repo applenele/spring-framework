@@ -1056,6 +1056,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 
 		if (mappedHandler != null) {
+			//HandlerInterceptorAdapter afterCompletion 执行
 			mappedHandler.triggerAfterCompletion(request, response, null);
 		}
 	}
