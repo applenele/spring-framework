@@ -39,6 +39,7 @@ import org.springframework.util.ObjectUtils;
  * mechanisms, {@code DisposableBeanAdapter.writeReplace} might not get used at all, so we
  * defensively mark this post-processor's field state as {@code transient}.
  *
+ *  ApplicationListener检测器
  * @author Juergen Hoeller
  * @since 4.3.4
  */
@@ -68,6 +69,13 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 		return bean;
 	}
 
+
+	/**
+	 * bean 初始化后置处理器调用
+	 * @param bean the new bean instance
+	 * @param beanName the name of the bean
+	 * @return
+	 */
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		if (this.applicationContext != null && bean instanceof ApplicationListener) {

@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
  *
  * <p>Mainly intended for internal use within the framework.
  *
+ * ApplicationEvent 装载类
  * @author Stephane Nicoll
  * @since 4.2
  * @param <T> the payload type of the event

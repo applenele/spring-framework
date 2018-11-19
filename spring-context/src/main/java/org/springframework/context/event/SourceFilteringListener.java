@@ -28,7 +28,8 @@ import org.springframework.core.ResolvableType;
  *
  * <p>Can also be used as base class, overriding the {@link #onApplicationEventInternal}
  * method instead of specifying a delegate listener.
- *
+ *  ApplicationListener 的装饰包装类
+ *  TODO 为什么需要包装类
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 2.0.5
@@ -49,6 +50,7 @@ public class SourceFilteringListener implements GenericApplicationListener, Smar
 	 */
 	public SourceFilteringListener(Object source, ApplicationListener<?> delegate) {
 		this.source = source;
+		// 将事件进一步的包装成GenericApplicationListener类型的
 		this.delegate = (delegate instanceof GenericApplicationListener ?
 				(GenericApplicationListener) delegate : new GenericApplicationListenerAdapter(delegate));
 	}
@@ -74,6 +76,7 @@ public class SourceFilteringListener implements GenericApplicationListener, Smar
 
 	@Override
 	public boolean supportsEventType(ResolvableType eventType) {
+		// supportsEventType 进一步调用委托对象的supportsEventType
 		return (this.delegate == null || this.delegate.supportsEventType(eventType));
 	}
 
