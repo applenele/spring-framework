@@ -203,6 +203,8 @@ public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWe
 			scanner.setScopeMetadataResolver(scopeMetadataResolver);
 		}
 
+		// 如果有配置类将配置类注册到容器中
+		// AnnotatedGenericBeanDefinition ->AnnotatedBeanDefinition
 		if (!this.annotatedClasses.isEmpty()) {
 			if (logger.isInfoEnabled()) {
 				logger.info("Registering annotated classes: [" +
